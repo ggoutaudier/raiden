@@ -1,0 +1,297 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8" />
+    <title>Making your first Phaser 3 Game - Part 10</title>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+<script type="text/javascript">
+
+var MOVE_MULTIPLIER = 80.0;
+var UPDATE_INTERVAL = 1000;
+
+var config = {
+    type: Phaser.AUTO,
+    width: 1200,
+    height: 600,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 300 },
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+var player;
+var player2;
+var player3;
+var player4;
+var flag;
+var unicorn;
+var stars;
+var bombs;
+var platforms;
+var cursors;
+var score = 0;
+var gameOver = false;
+var scoreText;
+var score1;
+var score2;
+var score3;
+var score4;
+var paymentCounter1 = 0;
+var paymentCounter2 = 0;
+var paymentCounter3 = 0;
+var paymentCounter4 = 0;
+var second_timer = 0;
+var catIsThere = false;
+
+axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
+const url_suffix = "api/v1/payments"
+
+const node1 = "http://localhost:5001/";
+const node2 = "http://localhost:5002/";
+const node3 = "http://localhost:5003/";
+const node4 = "http://localhost:5004/";
+//const nodes = [node1, node2, node3, node4];
+const nodes = [node1, node2];
+
+// create an array of known payment ids for each node
+let known_payments = []
+nodes.forEach((item, id) => {
+    known_payments.push([]);
+});
+
+var game = new Phaser.Game(config);
+
+function preload()
+{
+    this.load.image('sky', 'assets/sky.png');
+    this.load.image('ground', 'assets/platform.png');
+    this.load.image('star', 'assets/heart2.png');
+    this.load.image('doge', 'assets/doge.png');
+    this.load.image('bomb', 'assets/cat.png');
+    this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.image('deva', 'assets/deva.png');
+    this.load.image('flag', 'assets/flag.png');
+    this.load.image('cyril', 'assets/cyril.jpeg');
+    this.load.image('robert', 'assets/robert.jpeg');
+    this.load.image('vitalik', 'assets/vitalik.png');
+    this.load.image('carlos', 'assets/carlos.png');
+    this.load.image('heiko', 'assets/heiko.png');
+}
+
+async function create()
+{
+    //  A simple background for our game
+    this.add.image(400, 300, 'sky');
+    this.add.image(800, 300, 'sky');
+    this.add.image(1120, 80, 'doge').setScale(-0.5, 0.5);
+
+    //  The platforms group contains the ground and the 2 ledges we can jump on
+    platforms = this.physics.add.staticGroup();
+
+    //  Here we create the ground.
+    //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
+    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+    platforms.create(800, 568, 'ground').setScale(2).refreshBody();
+
+    //  Now let's create some ledges
+    platforms.create(50, 100, 'ground');
+    platforms.create(50, 250, 'ground');
+    platforms.create(50, 400, 'ground');
+    platforms.create(1250, 150, 'ground');
+    
+    flag = this.physics.add.sprite(1160, 450, 'flag').setScale(0.25);
+    flag.setBounce(0);
+
+    // The player and its settings
+    player = this.physics.add.sprite(30, 0, 'deva').setScale(0.4);
+    player2 = this.physics.add.sprite(30, 150, 'cyril').setScale(0.2);
+    player3 = this.physics.add.sprite(30, 300, 'vitalik').setScale(0.4);
+    player4 = this.physics.add.sprite(30, 450, 'robert').setScale(0.25);
+
+    //  Player physics properties. Give the little guy a slight bounce.
+    player.setBounce(0.2);
+    player.setCollideWorldBounds(false);
+    player2.setBounce(0.2);
+    player2.setCollideWorldBounds(false);
+    player3.setBounce(0.2);
+    player3.setCollideWorldBounds(false);
+    player4.setBounce(0.2);
+    player4.setCollideWorldBounds(false);
+
+    //  Input Events
+    cursors = this.input.keyboard.createCursorKeys();
+
+    //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
+    stars = this.physics.add.group({
+        key: 'star',
+        repeat: 2,
+        setXY: { x: 5*100, y: 0, stepX: 200 }
+    });
+
+    stars.children.iterate(function (child) {
+        //  Give each star a slightly different bounce
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    });
+
+    bombs = this.physics.add.group();
+
+    //  The score
+    scoreText = this.add.text(400, 300, '', { fontSize: '60px', fill: '#000' });
+
+    score1 = this.add.text(10, 90, '0 payments', {fontSize: '20px', fill: '#FFF'})
+    score2 = this.add.text(10, 240, '0 payments', {fontSize: '20px', fill: '#FFF'})
+    score3 = this.add.text(10, 390, '0 payments', {fontSize: '20px', fill: '#FFF'})
+    score4 = this.add.text(10, 540, '0 payments', {fontSize: '20px', fill: '#FFF'})
+
+    //  Collide the player and the stars with the platforms
+    this.physics.add.collider(player, platforms);
+    this.physics.add.collider(player2, platforms);
+    this.physics.add.collider(player3, platforms);
+    this.physics.add.collider(player4, platforms);
+    this.physics.add.collider(stars, platforms);
+    this.physics.add.collider(bombs, platforms);
+    this.physics.add.collider(flag, platforms);
+
+    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
+    this.physics.add.overlap(player, stars, collectStar, null, this);
+    this.physics.add.overlap(player2, stars, collectStar, null, this);
+    this.physics.add.overlap(player3, stars, collectStar, null, this);
+    this.physics.add.overlap(player4, stars, collectStar, null, this);
+
+    this.physics.add.overlap(player, flag, reachFlag, null, this);
+    this.physics.add.overlap(player2, flag, reachFlag, null, this);
+    this.physics.add.overlap(player3, flag, reachFlag, null, this);
+    this.physics.add.overlap(player4, flag, reachFlag, null, this);
+
+    await update_transfers()
+    console.log("Initialized payments")
+    console.log(known_payments)
+    second_timer = this.time.now;
+}
+
+async function update_transfers() {
+    try {
+        // request payments from all nodes in parallel
+        let allNodes = nodes.map(node => axios.get(`${node}${url_suffix}`));
+        let results = await Promise.all(allNodes);
+
+        let new_payments = [];
+
+        results.forEach((result, id) => {
+            let transfers = result.data
+            let new_transfers = 0;
+            transfers.forEach(transfer => {
+                // just react to transfers that were received
+                if (transfer.event === "EventPaymentReceivedSuccess") {
+                    let payment_id = transfer.identifier;
+                    const known_payment = known_payments[id].indexOf(payment_id) >= 0;
+
+                    // handle the payment and make sure it's not processed again
+                    if (!known_payment) {
+                        let amount = transfer.amount;
+                        // console.log('new payment', amount, payment_id);
+                        known_payments[id].push(payment_id);
+                        new_transfers += 1;
+                    }
+                    // console.log(known_payments[id])
+                }
+            });
+            new_payments.push(new_transfers);
+        });
+
+        return new_payments;
+    } catch (error) {
+        console.error('Error:', error);
+        return [0, 0, 0, 0];
+    }
+}
+
+async function update ()
+{
+    if (gameOver)
+    {
+        return;
+    }
+
+    if (this.time.now > second_timer) {
+        // console.log("A second just passed by, time to update...");
+        second_timer = this.time.now + UPDATE_INTERVAL;
+        
+        let new_payments = await update_transfers()
+        // let new_payments = [1, 5, 2, 3];
+
+        //paymentCounter1 += new_payments[0];
+        paymentCounter2 += new_payments[0];
+        //paymentCounter3 += new_payments[2];
+        paymentCounter4 += new_payments[1];
+        //score1.setText(`${paymentCounter1} payments`);
+        score2.setText(`${paymentCounter2} payments`);
+        //score3.setText(`${paymentCounter3} payments`);
+        score4.setText(`${paymentCounter4} payments`);
+        //player.setVelocityX(MOVE_MULTIPLIER * (new_payments[0]));
+        player2.setVelocityX(MOVE_MULTIPLIER * (new_payments[0]));
+        //player3.setVelocityX(MOVE_MULTIPLIER * (new_payments[2]));
+        player4.setVelocityX(MOVE_MULTIPLIER * (new_payments[1]));
+    }
+}
+
+function collectStar (player, star)
+{
+    star.disableBody(true, true);
+
+    player.setVelocityY(-200);
+    if (stars.countActive(true) === 0 && !catIsThere)
+    {
+        //  A new batch of stars to collect
+        stars.children.iterate(function (child) {
+
+            child.enableBody(true, child.x, 0, true, true);
+
+        });
+
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        var bomb = bombs.create(x, 16, 'bomb');
+        bomb.setBounce(1);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        bomb.setScale(0.2, 0.2);
+        bomb.allowGravity = false;
+        catIsThere = true;
+    }
+}
+
+function reachFlag(player, flag) {
+    //  Add and update the score
+    score += 10;
+    scoreText.setText('To the MOOOOON!');
+    gameOver = true;
+}
+
+</script>
+<li>
+    <ul>Deva: NOT PLAYING TODAY</ul>
+    <ul>Cyril: 0xd21C79f9dF0d559FCEfbEE90db6FB12822a0f287</ul>
+    <ul>Vitalik: NOT PLAYING TODAY</ul>
+    <ul>Robert: 0x77ad7E34614c475E6b52D34cB05e5362252c0024</ul>
+</li>
+<br />
+</body>
+</html>
