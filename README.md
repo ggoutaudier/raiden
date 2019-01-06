@@ -136,4 +136,4 @@ Feel free to change the amounts of the payments.
 - [Raiden installation instructions](https://raiden-network.readthedocs.io/en/latest/overview_and_guide.html#installation)
 - [Getting Started with Raiden API](https://raiden-network.readthedocs.io/en/latest/api_walkthrough.html)
 - [ETHSingaporeToken](https://kovan.etherscan.io/address/0x98a345f06e3A5DFe28EE0af38dd0780b4C0ed73B#code)
-- [Workshop Gitter Room](https://gitter.im/devchain-raiden-workshop)
+- [Workshop Gitter Room](https://gitter.im/devchain-raiden-workshop/community)
