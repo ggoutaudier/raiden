@@ -50,9 +50,9 @@ tar -xvzf onboarder-linux.tar.gz
 The fastest way to get up and running is to use the latest nightly binary releases. Just follow the instructions below.
 
 #### macOS instructions
-- Download the [latest nightly macOS binary](https://raiden-nightlies.ams3.digitaloceanspaces.com/):
+- Download the [latest nightly macOS binary](https://raiden-nightlies.ams3.digitaloceanspaces.com/index.html):
 ```sh
-curl -O <COPY PASTE THE URL>
+curl -O <PASTE_THE_URL>
 ```
 - Unzip the file:
 ```sh
@@ -60,9 +60,9 @@ unzip raiden-nightly-*
 ```
 
 #### Linux instructions
-- Download the [latest nightly macOS binary](https://raiden-nightlies.ams3.digitaloceanspaces.com/):
+- Download the [latest nightly macOS binary](https://raiden-nightlies.ams3.digitaloceanspaces.com/index.html):
 ```sh
-curl -O <COPY PASTE THE URL>
+curl -O <PASTE_THE_URL>
 ```
 - Extract the file:
 ```sh
