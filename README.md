@@ -16,7 +16,8 @@ For information, the initial repository from the Riden team is here: https://git
 - We have created [a gitter room](https://gitter.im/raiden-network/eth-singapore-hackathon) that you can use for asking questions or find out where you can find us if you need help or want to discuss something face-to-face.
 
 ### On-boarding:
-We've created a simple script that generates a keystore / address and sends Kovan ETH and ETHSingaporeTokens to the generated address. Follow these simple steps:
+We've created a simple script that generates a keystore / address and sends Kovan ETH and ETHSingaporeTokens to the generated address. 
+Follow the below steps and then loookup the newly generated account on [Kovan Etherscan](https://kovan.etherscan.io/):
 
 #### macOS instructions
 - Download the onboarder [macOS binary](https://raiden-nightlies.ams3.digitaloceanspaces.com/onboarder-macOS.zip):
