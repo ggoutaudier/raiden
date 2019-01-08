@@ -132,9 +132,15 @@ curl -i -X POST http://localhost:5001/api/1/payments/ \
 
 Feel free to change the amounts of the payments.
 
+
+### Let's play!
+
+A game will be displayed on the screen. Choose a player and make him progress on the screen by sending him payments!
+
+
 ### Other resources
 - [API documentation](https://raiden-network.readthedocs.io/en/latest/rest_api.html)
 - [Raiden installation instructions](https://raiden-network.readthedocs.io/en/latest/overview_and_guide.html#installation)
 - [Getting Started with Raiden API](https://raiden-network.readthedocs.io/en/latest/api_walkthrough.html)
 - [ETHSingaporeToken](https://kovan.etherscan.io/address/0x98a345f06e3A5DFe28EE0af38dd0780b4C0ed73B#code)
-- [Workshop Gitter Room](https://gitter.im/devchain-raiden-workshop/community)
+- [Raiden Gitter Room](https://gitter.im/raiden-network/raiden)
